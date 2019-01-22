@@ -44,7 +44,7 @@ Will prompt you shell name when you type `C-u' before this command."
     (setq multi-libvterm-buffer-list (nconc multi-libvterm-buffer-list (list vterm-buffer)))
 
     (set-buffer vterm-buffer)
-    (multi-libvterm-handle-close)
+    (multi-libvterm-internal)
     (switch-to-buffer vterm-buffer)))
 
 ;;;###autoload
@@ -60,7 +60,7 @@ Will prompt you shell name when you type `C-u' before this command."
 	  (setq multi-libvterm-dedicated-buffer (multi-libvterm-get-buffer t))
 	  (set-buffer (multi-libvterm-dedicated-get-buffer-name))
 	  (multi-libvterm-dedicated-get-window)
-	  (multi-libvterm-handle-close))
+	  (multi-libvterm-internal))
 	(set-window-buffer multi-libvterm-dedicated-window (get-buffer (multi-libvterm-dedicated-get-buffer-name)))
 	(set-window-dedicated-p multi-libvterm-dedicated-window t)
 	(select-window multi-libvterm-dedicated-window))
@@ -138,6 +138,18 @@ Option OFFSET for skip OFFSET number term buffer."
     (multi-libvterm)))
 
 ;; Utility Functions
+(defun multi-libvterm-internal ()
+    "Internal handle for `multi-libvterm' buffer."
+  (multi-libvterm-handle-close)
+  (add-hook 'kill-buffer-hook 'multi-libvterm-kill-buffer-hook))
+
+(defun multi-libvterm-kill-buffer-hook ()
+  "Function that hook `kill-buffer-hook'."
+  (when (eq major-mode 'vterm-mode)
+    (let ((killed-buffer (current-buffer)))
+      (setq multi-libvterm-buffer-list
+	    (delq killed-buffer multi-libvterm-buffer-list)))))
+
 (defun multi-libvterm-shell-name ()
   (or multi-libvterm-program
       (getenv "SHELL")
@@ -185,13 +197,10 @@ Option OFFSET for skip OFFSET number term buffer."
   (if multi-libvterm-buffer-list
       (let ((buffer-list-len (length multi-libvterm-buffer-list))
 	    (my-index (position (current-buffer) multi-libvterm-buffer-list)))
-	(message "multi-term-buffer-list %s" multi-libvterm-buffer-list)
-	(message "my-index %s" my-index)
 	(if my-index
 	    (let ((target-index (if (eq direction 'NEXT)
 				    (mod (+ my-index offset) buffer-list-len)
 				  (mod (- my-index offset) buffer-list-len))))
-	      (message "target-index %d" target-index)
 	      (switch-to-buffer (nth target-index multi-libvterm-buffer-list)))
 	  (switch-to-buffer (car multi-libvterm-buffer-list))))
     nil))
