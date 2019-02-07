@@ -1,4 +1,5 @@
 (require 'vterm)
+(require 'projectile)
 
 (defgroup multi-libvterm nil
   "Multi term manager"
@@ -48,6 +49,24 @@ Will prompt you shell name when you type `C-u' before this command."
     (switch-to-buffer vterm-buffer)))
 
 ;;;###autoload
+(defun multi-libvterm-projectile ()
+  "Create new vterm buffer.
+Will prompt you shell name when you type `C-u' before this command."
+  (interactive)
+  (if (projectile-project-p)
+      (if (buffer-live-p (get-buffer (multi-libvterm-projectile-get-buffer-name)))
+	  (if (string-equal (buffer-name (current-buffer)) (multi-libvterm-projectile-get-buffer-name))
+	      (delete-window (selected-window))
+	    (switch-to-buffer-other-window (multi-libvterm-projectile-get-buffer-name)))
+	(let (vterm-buffer)
+	  (setq vterm-buffer (multi-libvterm-get-buffer 'projectile))
+	  (setq multi-libvterm-buffer-list (nconc multi-libvterm-buffer-list (list vterm-buffer)))
+	  (set-buffer vterm-buffer)
+	  (multi-libvterm-internal)
+	  (switch-to-buffer-other-window vterm-buffer)))
+    (message "This file is not in a project")))
+
+;;;###autoload
 (defun multi-libvterm-dedicated-open ()
   "Open dedicated `multi-libvterm' window.
 Will prompt you shell name when you type `C-u' before this command."
@@ -57,7 +76,7 @@ Will prompt you shell name when you type `C-u' before this command."
 	(if (multi-libvterm-buffer-exist-p multi-libvterm-dedicated-buffer)
 	    (unless (multi-libvterm-window-exist-p multi-libvterm-dedicated-window)
 	      (multi-libvterm-dedicated-get-window))
-	  (setq multi-libvterm-dedicated-buffer (multi-libvterm-get-buffer t))
+	  (setq multi-libvterm-dedicated-buffer (multi-libvterm-get-buffer 'dedicated))
 	  (set-buffer (multi-libvterm-dedicated-get-buffer-name))
 	  (multi-libvterm-dedicated-get-window)
 	  (multi-libvterm-internal))
@@ -99,15 +118,24 @@ Will prompt you shell name when you type `C-u' before this command."
     (let ((shell-name (multi-libvterm-shell-name))
 	  (index 1)
 	  vterm-name)
-      (if dedicated-window
-	  (setq vterm-name (multi-libvterm-dedicated-get-buffer-name))
-	(while (buffer-live-p (get-buffer (format "*%s<%s>*" multi-libvterm-buffer-name index)))
-	  (setq index (1+ index)))
-	(setq vterm-name (format "*%s<%s>*" multi-libvterm-buffer-name index)))
-      (let ((buffer (generate-new-buffer vterm-name)))
-	(set-buffer buffer)
-	(vterm-mode)
-	buffer))))
+      (cond ((eq dedicated-window 'dedicated) (setq vterm-name (multi-libvterm-dedicated-get-buffer-name)))
+	    ((eq dedicated-window 'projectile) (progn
+						 (setq vterm-name (multi-libvterm-projectile-get-buffer-name))
+						 (setq default-directory (projectile-project-root))))
+	    (t (progn
+		 (while (buffer-live-p (get-buffer (format "*%s<%s>*" multi-libvterm-buffer-name index)))
+		   (setq index (1+ index)))
+		 (setq vterm-name (format "*%s<%s>*" multi-libvterm-buffer-name index)))))
+      (if-let ((buffer (get-buffer vterm-name)))
+	  buffer
+	(let ((buffer (generate-new-buffer vterm-name)))
+	  (set-buffer buffer)
+	  (vterm-mode)
+	  buffer)))))
+
+(defun multi-libvterm-projectile-get-buffer-name ()
+  "Get projectile buffer name"
+  (format "*vterm - %s*" (projectile-project-root)))
 
 (defun multi-libvterm-handle-close ()
   "Close current vterm buffer when `exit' from vterm buffer."
