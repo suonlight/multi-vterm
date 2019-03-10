@@ -25,7 +25,7 @@ Follow [emacs-libvterm](https://github.com/akermu/emacs-libvterm) to install `em
 
 # For Evil users
 
-I'm using Evil. This is my personal config to use libvterm with ``evil`
+I'm using Evil. This is my personal config to use libvterm with `evil`
 
 
 ```elisp
