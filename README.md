@@ -55,11 +55,6 @@ I'm using Evil. This is my personal config to use libvterm with `evil`
 	(cl-loop for key in bash-shortcuts
 		 do (evil-declare-key 'insert vterm-mode-map (kbd key) 'vterm--self-insert))
 
-	(defun vterm-send-ctrl-j ()
-	  "Sends enter to the libvterm."
-	  (interactive)
-	  (vterm-send-key "j" nil nil t))
-
 	(add-hook 'vterm-mode-hook
 		  (lambda ()
 		    (evil-insert-state)))
