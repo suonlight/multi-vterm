@@ -33,35 +33,37 @@ I'm using Evil. This is my personal config to use libvterm with `evil`
 	:load-path "/path/to/emacs-libvterm"
 	:config
 	(setq vterm-keymap-exceptions nil)
-	(defvar bash-shortcuts '("C-e"
-				 "C-f"
-				 "C-a"
-				 "C-v"
-				 "C-b"
-				 "C-w"
-				 "C-u"
-				 "C-d"
-				 "C-n"
-				 "C-m"
-				 "C-p"
-				 "C-j"
-				 "C-k"
-				 "C-r"
-				 "C-t"
-				 "C-g"
-				 "C-SPC"
-				 "C-c"))
-
-	(cl-loop for key in bash-shortcuts
-		 do (evil-declare-key 'insert vterm-mode-map (kbd key) 'vterm--self-insert))
 
 	(add-hook 'vterm-mode-hook
-		  (lambda ()
-		    (evil-insert-state)))
+			(lambda ()
+			(setq-local evil-insert-state-cursor 'box)
+			(evil-insert-state)))
+
+	(define-key vterm-mode-map [return]                    #'vterm-send-return)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-e") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-f") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-a") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-v") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-b") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-w") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-u") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-d") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-n") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-m") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-p") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-j") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-k") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-r") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-t") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-g") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-SPC") #'vterm--self-insert)
+	(evil-declare-key 'insert vterm-mode-map (kbd "C-c") #'vterm--self-insert)
+	(evil-declare-key 'normal vterm-mode-map (kbd "C-d") 'vterm--self-insert)
 
 	(evil-declare-key 'normal vterm-mode-map (kbd ",c") #'multi-libvterm)
 	(evil-declare-key 'normal vterm-mode-map (kbd ",n") #'multi-libvterm-next)
 	(evil-declare-key 'normal vterm-mode-map (kbd ",p") #'multi-libvterm-prev)
-	(evil-declare-key 'normal vterm-mode-map (kbd "o") 'evil-insert-state))
-	(evil-declare-key 'normal vterm-mode-map (kbd "C-d") 'vterm--self-insert)
+	(evil-declare-key 'normal vterm-mode-map (kbd "i") 'evil-insert-resume)
+	(evil-declare-key 'normal vterm-mode-map (kbd "<return>") 'evil-insert-resume)
+	(evil-declare-key 'normal vterm-mode-map (kbd "o") 'evil-insert-resume))
 ```
