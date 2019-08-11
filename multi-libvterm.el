@@ -1,6 +1,6 @@
 ;;; multi-libvterm.el --- This is similiar with multi-term.el but it integrates with emacs-libvterm
 ;;
-;; Authors: Minh Nguyen-Hue <jasonm23@gmail.com>
+;; Authors: Minh Nguyen-Hue <minh.nh1989@gmail.com>
 ;; URL: https://github.com/suonlight/multi-libvterm
 ;; Version: 1.0
 ;;
