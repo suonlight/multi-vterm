@@ -1,7 +1,8 @@
-;;; multi-libvterm.el --- This is similiar with multi-term.el but it integrates with emacs-libvterm
+;;; multi-libvterm.el --- This is similiar with multi-term.el but for libvterm
 ;;
 ;; Authors: Minh Nguyen-Hue <minh.nh1989@gmail.com>
 ;; URL: https://github.com/suonlight/multi-libvterm
+;; Keywords: lisp
 ;; Version: 1.0
 ;;
 ;;; Commentary:
@@ -83,16 +84,16 @@ Will prompt you shell name when you type `C-u' before this command."
 Will prompt you shell name when you type `C-u' before this command."
   (interactive)
   (if (projectile-project-p)
-      (if (buffer-live-p (get-buffer (multi-libvterm-projectile-get-buffer-name)))
-	  (if (string-equal (buffer-name (current-buffer)) (multi-libvterm-projectile-get-buffer-name))
-	      (delete-window (selected-window))
-	    (switch-to-buffer-other-window (multi-libvterm-projectile-get-buffer-name)))
-	(let (vterm-buffer)
-	  (setq vterm-buffer (multi-libvterm-get-buffer 'projectile))
-	  (setq multi-libvterm-buffer-list (nconc multi-libvterm-buffer-list (list vterm-buffer)))
-	  (set-buffer vterm-buffer)
-	  (multi-libvterm-internal)
-	  (switch-to-buffer-other-window vterm-buffer)))
+    (if (buffer-live-p (get-buffer (multi-libvterm-projectile-get-buffer-name)))
+      (if (string-equal (buffer-name (current-buffer)) (multi-libvterm-projectile-get-buffer-name))
+        (delete-window (selected-window))
+        (switch-to-buffer-other-window (multi-libvterm-projectile-get-buffer-name)))
+      (let (vterm-buffer)
+        (setq vterm-buffer (multi-libvterm-get-buffer 'projectile))
+        (setq multi-libvterm-buffer-list (nconc multi-libvterm-buffer-list (list vterm-buffer)))
+        (set-buffer vterm-buffer)
+        (multi-libvterm-internal)
+        (switch-to-buffer-other-window vterm-buffer)))
     (message "This file is not in a project")))
 
 ;;;###autoload
@@ -101,17 +102,17 @@ Will prompt you shell name when you type `C-u' before this command."
 Will prompt you shell name when you type `C-u' before this command."
   (interactive)
   (if (not (multi-libvterm-dedicated-exist-p))
-      (let ((current-window (selected-window)))
-	(if (multi-libvterm-buffer-exist-p multi-libvterm-dedicated-buffer)
-	    (unless (multi-libvterm-window-exist-p multi-libvterm-dedicated-window)
-	      (multi-libvterm-dedicated-get-window))
-	  (setq multi-libvterm-dedicated-buffer (multi-libvterm-get-buffer 'dedicated))
-	  (set-buffer (multi-libvterm-dedicated-get-buffer-name))
-	  (multi-libvterm-dedicated-get-window)
-	  (multi-libvterm-internal))
-	(set-window-buffer multi-libvterm-dedicated-window (get-buffer (multi-libvterm-dedicated-get-buffer-name)))
-	(set-window-dedicated-p multi-libvterm-dedicated-window t)
-	(select-window multi-libvterm-dedicated-window))
+    (let ((current-window (selected-window)))
+      (if (multi-libvterm-buffer-exist-p multi-libvterm-dedicated-buffer)
+        (unless (multi-libvterm-window-exist-p multi-libvterm-dedicated-window)
+          (multi-libvterm-dedicated-get-window))
+        (setq multi-libvterm-dedicated-buffer (multi-libvterm-get-buffer 'dedicated))
+        (set-buffer (multi-libvterm-dedicated-get-buffer-name))
+        (multi-libvterm-dedicated-get-window)
+        (multi-libvterm-internal))
+      (set-window-buffer multi-libvterm-dedicated-window (get-buffer (multi-libvterm-dedicated-get-buffer-name)))
+      (set-window-dedicated-p multi-libvterm-dedicated-window t)
+      (select-window multi-libvterm-dedicated-window))
     (message "`multi-libvterm' dedicated window has exist.")))
 
 ;;;###autoload
@@ -119,11 +120,11 @@ Will prompt you shell name when you type `C-u' before this command."
   "Close dedicated `multi-libvterm' window."
   (interactive)
   (if (multi-libvterm-dedicated-exist-p)
-      (let ((current-window (selected-window)))
-        (multi-libvterm-dedicated-select)
-	(delete-window multi-libvterm-dedicated-window)
-	(if (multi-libvterm-window-exist-p current-window)
-	    (select-window current-window)))
+    (let ((current-window (selected-window)))
+      (multi-libvterm-dedicated-select)
+      (delete-window multi-libvterm-dedicated-window)
+      (if (multi-libvterm-window-exist-p current-window)
+        (select-window current-window)))
     (message "`multi-libvterm' window is not exist.")))
 
 ;;;###autoload
@@ -131,7 +132,7 @@ Will prompt you shell name when you type `C-u' before this command."
   "Toggle dedicated `multi-libvterm' window."
   (interactive)
   (if (multi-libvterm-dedicated-exist-p)
-      (multi-libvterm-dedicated-close)
+    (multi-libvterm-dedicated-close)
     (multi-libvterm-dedicated-open)))
 
 ;;;###autoload
@@ -139,7 +140,7 @@ Will prompt you shell name when you type `C-u' before this command."
   "Select the `multi-libvterm' dedicated window."
   (interactive)
   (if (multi-libvterm-dedicated-exist-p)
-      (select-window multi-libvterm-dedicated-window)
+    (select-window multi-libvterm-dedicated-window)
     (message "`multi-libvterm' window is not exist.")))
 
 (defun multi-libvterm-get-buffer (&optional dedicated-window)
@@ -147,22 +148,23 @@ Will prompt you shell name when you type `C-u' before this command."
 Optional argument DEDICATED-WINDOW: There are three types of DECIATED_WINDOW: dedicated, projectile, default."
   (with-temp-buffer
     (let ((shell-name (multi-libvterm-shell-name))
-	  (index 1)
-	  vterm-name)
+           (index 1)
+           vterm-name)
       (cond ((eq dedicated-window 'dedicated) (setq vterm-name (multi-libvterm-dedicated-get-buffer-name)))
-	    ((eq dedicated-window 'projectile) (progn
-						 (setq vterm-name (multi-libvterm-projectile-get-buffer-name))
-						 (setq default-directory (projectile-project-root))))
-	    (t (progn
-		 (while (buffer-live-p (get-buffer (format "*%s<%s>*" multi-libvterm-buffer-name index)))
-		   (setq index (1+ index)))
-		 (setq vterm-name (format "*%s<%s>*" multi-libvterm-buffer-name index)))))
-      (if-let ((buffer (get-buffer vterm-name)))
-	  buffer
-	(let ((buffer (generate-new-buffer vterm-name)))
-	  (set-buffer buffer)
-	  (vterm-mode)
-	  buffer)))))
+        ((eq dedicated-window 'projectile) (progn
+                                             (setq vterm-name (multi-libvterm-projectile-get-buffer-name))
+                                             (setq default-directory (projectile-project-root))))
+        (t (progn
+             (while (buffer-live-p (get-buffer (format "*%s<%s>*" multi-libvterm-buffer-name index)))
+               (setq index (1+ index)))
+             (setq vterm-name (format "*%s<%s>*" multi-libvterm-buffer-name index)))))
+      (let ((buffer (get-buffer vterm-name)))
+        (if buffer
+          buffer
+          (let ((buffer (generate-new-buffer vterm-name)))
+            (set-buffer buffer)
+            (vterm-mode)
+            buffer))))))
 
 (defun multi-libvterm-projectile-get-buffer-name ()
   "Get projectile buffer name."
@@ -172,9 +174,9 @@ Optional argument DEDICATED-WINDOW: There are three types of DECIATED_WINDOW: de
   "Close current vterm buffer when `exit' from vterm buffer."
   (when (ignore-errors (get-buffer-process (current-buffer)))
     (set-process-sentinel (get-buffer-process (current-buffer))
-			  (lambda (proc change)
-			    (when (string-match "\\(finished\\|exited\\)" change)
-			      (kill-buffer (process-buffer proc)))))))
+      (lambda (proc change)
+        (when (string-match "\\(finished\\|exited\\)" change)
+          (kill-buffer (process-buffer proc)))))))
 
 (defun multi-libvterm-next (&optional offset)
   "Go to the next term buffer.
@@ -198,7 +200,7 @@ Option OFFSET for skip OFFSET number term buffer."
 
 ;; Utility Functions
 (defun multi-libvterm-internal ()
-    "Internal handle for `multi-libvterm' buffer."
+  "Internal handle for `multi-libvterm' buffer."
   (multi-libvterm-handle-close)
   (add-hook 'kill-buffer-hook 'multi-libvterm-kill-buffer-hook))
 
@@ -207,20 +209,20 @@ Option OFFSET for skip OFFSET number term buffer."
   (when (eq major-mode 'vterm-mode)
     (let ((killed-buffer (current-buffer)))
       (setq multi-libvterm-buffer-list
-	    (delq killed-buffer multi-libvterm-buffer-list)))))
+        (delq killed-buffer multi-libvterm-buffer-list)))))
 
 (defun multi-libvterm-shell-name ()
   "Get shell-name based on var `multi-libvterm-program' or env SHELL or default /bin/sh."
   (or multi-libvterm-program
-      (getenv "SHELL")
-      "/bin/sh"))
+    (getenv "SHELL")
+    "/bin/sh"))
 
 (defun multi-libvterm-dedicated-get-window ()
   "Get `multi-libvterm' dedicated window."
   (setq multi-libvterm-dedicated-window
-        (split-window
-         (selected-window)
-         (- (multi-libvterm-current-window-take-height) multi-libvterm-dedicated-window-height))))
+    (split-window
+      (selected-window)
+      (- (multi-libvterm-current-window-take-height) multi-libvterm-dedicated-window-height))))
 
 (defun multi-libvterm-current-window-take-height (&optional window)
   "Return the height the `window' takes up.
@@ -237,7 +239,7 @@ If `window' is nil, get current window."
 (defun multi-libvterm-dedicated-exist-p ()
   "Return `non-nil' if `multi-libvterm' dedicated window exist."
   (and (multi-libvterm-buffer-exist-p multi-libvterm-dedicated-buffer)
-       (multi-libvterm-window-exist-p multi-libvterm-dedicated-window)))
+    (multi-libvterm-window-exist-p multi-libvterm-dedicated-window)))
 
 (defun multi-libvterm-window-exist-p (window)
   "Return `non-nil' if WINDOW exist.
@@ -255,14 +257,14 @@ If DIRECTION is `NEXT', switch to the next term.
 If DIRECTION `PREVIOUS', switch to the previous term.
 Option OFFSET for skip OFFSET number term buffer."
   (if multi-libvterm-buffer-list
-      (let ((buffer-list-len (length multi-libvterm-buffer-list))
-	    (my-index (position (current-buffer) multi-libvterm-buffer-list)))
-	(if my-index
-	    (let ((target-index (if (eq direction 'NEXT)
-				    (mod (+ my-index offset) buffer-list-len)
-				  (mod (- my-index offset) buffer-list-len))))
-	      (switch-to-buffer (nth target-index multi-libvterm-buffer-list)))
-	  (switch-to-buffer (car multi-libvterm-buffer-list))))
+    (let ((buffer-list-len (length multi-libvterm-buffer-list))
+           (my-index (position (current-buffer) multi-libvterm-buffer-list)))
+      (if my-index
+        (let ((target-index (if (eq direction 'NEXT)
+                              (mod (+ my-index offset) buffer-list-len)
+                              (mod (- my-index offset) buffer-list-len))))
+          (switch-to-buffer (nth target-index multi-libvterm-buffer-list)))
+        (switch-to-buffer (car multi-libvterm-buffer-list))))
     nil))
 
 (provide 'multi-libvterm)
