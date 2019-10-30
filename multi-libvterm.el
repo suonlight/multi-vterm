@@ -143,6 +143,8 @@ Will prompt you shell name when you type `C-u' before this command."
     (message "`multi-libvterm' window is not exist.")))
 
 (defun multi-libvterm-get-buffer (&optional dedicated-window)
+  "Get vterm buffer name based on DEDICATED-WINDOWN.
+Optional argument DEDICATED-WINDOW: There are three types of DECIATED_WINDOW: dedicated, projectile, default."
   (with-temp-buffer
     (let ((shell-name (multi-libvterm-shell-name))
 	  (index 1)
@@ -163,7 +165,7 @@ Will prompt you shell name when you type `C-u' before this command."
 	  buffer)))))
 
 (defun multi-libvterm-projectile-get-buffer-name ()
-  "Get projectile buffer name"
+  "Get projectile buffer name."
   (format "*vterm - %s*" (projectile-project-root)))
 
 (defun multi-libvterm-handle-close ()
@@ -208,6 +210,7 @@ Option OFFSET for skip OFFSET number term buffer."
 	    (delq killed-buffer multi-libvterm-buffer-list)))))
 
 (defun multi-libvterm-shell-name ()
+  "Get shell-name based on var `multi-libvterm-program' or env SHELL or default /bin/sh."
   (or multi-libvterm-program
       (getenv "SHELL")
       "/bin/sh"))
