@@ -66,7 +66,7 @@ If this is nil, setup to environment variable of `SHELL'."
 
 ;; Interactive Functions
 ;;;###autoload
-(defun multi-libvterm ()
+(defun multi-libvterm (&optional buffer-name)
   "Create new vterm buffer.
 Will prompt you shell name when you type `C-u' before this command."
   (interactive)
