@@ -258,7 +258,7 @@ If DIRECTION `PREVIOUS', switch to the previous term.
 Option OFFSET for skip OFFSET number term buffer."
   (if multi-libvterm-buffer-list
     (let ((buffer-list-len (length multi-libvterm-buffer-list))
-           (my-index (position (current-buffer) multi-libvterm-buffer-list)))
+           (my-index (cl-position (current-buffer) multi-libvterm-buffer-list)))
       (if my-index
         (let ((target-index (if (eq direction 'NEXT)
                               (mod (+ my-index offset) buffer-list-len)
