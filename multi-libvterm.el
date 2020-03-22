@@ -1,4 +1,4 @@
-;;; multi-libvterm.el --- This is similiar with multi-term.el but for libvterm
+;;; multi-libvterm.el --- This is similiar with multi-term.el but for libvterm -*- lexical-binding: t; -*-
 ;;
 ;; Authors: Minh Nguyen-Hue <minh.nh1989@gmail.com>
 ;; URL: https://github.com/suonlight/multi-libvterm
