@@ -4,6 +4,7 @@
 ;; URL: https://github.com/suonlight/multi-libvterm
 ;; Keywords: lisp
 ;; Version: 1.0
+;; Package-Requires: ((emacs "26.3"))
 ;;
 ;;; Commentary:
 ;; This is similiar with multi-term.el but it integrates with emacs-libvterm
@@ -27,6 +28,7 @@
 ;; Features that might be required by this library:
 ;;
 ;;  `vterm'
+;;  `projectile'
 ;;; Code:
 (require 'vterm)
 (require 'projectile)
@@ -66,7 +68,7 @@ If this is nil, setup to environment variable of `SHELL'."
 
 ;; Interactive Functions
 ;;;###autoload
-(defun multi-libvterm (&optional buffer-name)
+(defun multi-libvterm (&optional _buffer-name)
   "Create new vterm buffer.
 Will prompt you shell name when you type `C-u' before this command."
   (interactive)
@@ -102,17 +104,16 @@ Will prompt you shell name when you type `C-u' before this command."
 Will prompt you shell name when you type `C-u' before this command."
   (interactive)
   (if (not (multi-libvterm-dedicated-exist-p))
-    (let ((current-window (selected-window)))
-      (if (multi-libvterm-buffer-exist-p multi-libvterm-dedicated-buffer)
-        (unless (multi-libvterm-window-exist-p multi-libvterm-dedicated-window)
-          (multi-libvterm-dedicated-get-window))
-        (setq multi-libvterm-dedicated-buffer (multi-libvterm-get-buffer 'dedicated))
-        (set-buffer (multi-libvterm-dedicated-get-buffer-name))
-        (multi-libvterm-dedicated-get-window)
-        (multi-libvterm-internal))
-      (set-window-buffer multi-libvterm-dedicated-window (get-buffer (multi-libvterm-dedicated-get-buffer-name)))
-      (set-window-dedicated-p multi-libvterm-dedicated-window t)
-      (select-window multi-libvterm-dedicated-window))
+    (if (multi-libvterm-buffer-exist-p multi-libvterm-dedicated-buffer)
+      (unless (multi-libvterm-window-exist-p multi-libvterm-dedicated-window)
+        (multi-libvterm-dedicated-get-window))
+      (setq multi-libvterm-dedicated-buffer (multi-libvterm-get-buffer 'dedicated))
+      (set-buffer (multi-libvterm-dedicated-get-buffer-name))
+      (multi-libvterm-dedicated-get-window)
+      (multi-libvterm-internal))
+    (set-window-buffer multi-libvterm-dedicated-window (get-buffer (multi-libvterm-dedicated-get-buffer-name)))
+    (set-window-dedicated-p multi-libvterm-dedicated-window t)
+    (select-window multi-libvterm-dedicated-window)
     (message "`multi-libvterm' dedicated window has exist.")))
 
 ;;;###autoload
@@ -147,8 +148,7 @@ Will prompt you shell name when you type `C-u' before this command."
   "Get vterm buffer name based on DEDICATED-WINDOWN.
 Optional argument DEDICATED-WINDOW: There are three types of DECIATED_WINDOW: dedicated, projectile, default."
   (with-temp-buffer
-    (let ((shell-name (multi-libvterm-shell-name))
-           (index 1)
+    (let ((index 1)
            vterm-name)
       (cond ((eq dedicated-window 'dedicated) (setq vterm-name (multi-libvterm-dedicated-get-buffer-name)))
         ((eq dedicated-window 'projectile) (progn
