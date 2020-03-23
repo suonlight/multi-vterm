@@ -1,6 +1,7 @@
 # multi-libvterm.el
 
-This is similiar with [multi-term.el](https://github.com/milkypostman/multi-term) but it integrates with [emacs-libvterm](https://github.com/akermu/emacs-libvterm)
+Managing multiple [vterm](https://github.com/akermu/emacs-libvterm) buffers in Emacs
+This package is inspired by [multi-term.el](https://github.com/milkypostman/multi-term)
 
 # Installation
 
