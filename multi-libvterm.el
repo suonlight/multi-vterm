@@ -1,14 +1,14 @@
-;;; multi-libvterm.el --- This is similiar with multi-term.el but for libvterm -*- lexical-binding: t; -*-
+;;; multi-libvterm.el --- This is similar with multi-term.el but for libvterm -*- lexical-binding: t; -*-
 ;;
 ;; Authors: Minh Nguyen-Hue <minh.nh1989@gmail.com>
 ;; URL: https://github.com/suonlight/multi-libvterm
-;; Keywords: lisp
+;; Keywords: terminals, processes
 ;; Version: 1.0
-;; Package-Requires: ((emacs "26.3"))
+;; Package-Requires: ((emacs "26.3") (vterm "0.0") (projectile "1.2.0"))
 ;;
 ;;; Commentary:
-;; This is similiar with multi-term.el but it integrates with emacs-libvterm
-;; Keywords: term, terminal, vterm, multiple buffer
+;; Managing multiple libvterm (vterm) buffers in Emacs
+;; This package is inspired by multi-term.el
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 ;;  `vterm'
 ;;  `projectile'
 ;;; Code:
+(require 'cl-lib)
 (require 'vterm)
 (require 'projectile)
 
@@ -52,6 +53,7 @@ If this is nil, setup to environment variable of `SHELL'."
   "The height of `multi-libvterm' dedicated window."
   :type 'integer
   :group 'multi-libvterm)
+
 ;; Contants
 (defconst multi-libvterm-dedicated-buffer-name "vterm-dedicated"
   "The buffer name of dedicated `vterm'.")
@@ -145,8 +147,8 @@ Will prompt you shell name when you type `C-u' before this command."
     (message "`multi-libvterm' window is not exist.")))
 
 (defun multi-libvterm-get-buffer (&optional dedicated-window)
-  "Get vterm buffer name based on DEDICATED-WINDOWN.
-Optional argument DEDICATED-WINDOW: There are three types of DECIATED_WINDOW: dedicated, projectile, default."
+  "Get vterm buffer name based on DEDICATED-WINDOW.
+Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: dedicated, projectile, default."
   (with-temp-buffer
     (let ((index 1)
            vterm-name)
@@ -202,7 +204,7 @@ Option OFFSET for skip OFFSET number term buffer."
 (defun multi-libvterm-internal ()
   "Internal handle for `multi-libvterm' buffer."
   (multi-libvterm-handle-close)
-  (add-hook 'kill-buffer-hook 'multi-libvterm-kill-buffer-hook))
+  (add-hook 'kill-buffer-hook #'multi-libvterm-kill-buffer-hook))
 
 (defun multi-libvterm-kill-buffer-hook ()
   "Function that hook `kill-buffer-hook'."
