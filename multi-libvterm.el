@@ -70,7 +70,7 @@ If nil, this defaults to the SHELL environment variable."
 
 ;; Interactive Functions
 ;;;###autoload
-(defun multi-libvterm (&optional _buffer-name)
+(defun multi-libvterm ()
   "Create new vterm buffer."
   (interactive)
   (let* ((vterm-buffer (multi-libvterm-get-buffer))
