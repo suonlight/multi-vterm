@@ -211,10 +211,10 @@ Option OFFSET for skip OFFSET number term buffer."
             (delq killed-buffer multi-libvterm-buffer-list)))))
 
 (defun multi-libvterm-shell-name ()
-  "Get shell-name based on var `multi-libvterm-program' or env SHELL or default /bin/sh."
+  "Get shell-name based on var `multi-libvterm-program' or env SHELL or default `shell-file-name'."
   (or multi-libvterm-program
       (getenv "SHELL")
-      "/bin/sh"))
+      shell-file-name))
 
 (defun multi-libvterm-dedicated-get-window ()
   "Get `multi-libvterm' dedicated window."
