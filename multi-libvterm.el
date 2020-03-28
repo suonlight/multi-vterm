@@ -71,8 +71,7 @@ If nil, this defaults to the SHELL environment variable."
 ;; Interactive Functions
 ;;;###autoload
 (defun multi-libvterm (&optional _buffer-name)
-  "Create new vterm buffer.
-Will prompt you for the shell name when you type `C-u' before this command."
+  "Create new vterm buffer."
   (interactive)
   (let* ((vterm-buffer (multi-libvterm-get-buffer))
          (multi-libvterm-buffer-list (nconc multi-libvterm-buffer-list (list vterm-buffer))))
@@ -82,8 +81,7 @@ Will prompt you for the shell name when you type `C-u' before this command."
 
 ;;;###autoload
 (defun multi-libvterm-projectile ()
-  "Create new vterm buffer.
-Will prompt you for the shell name when you type `C-u' before this command."
+  "Create new vterm buffer. "
   (interactive)
   (if (projectile-project-p)
       (if (buffer-live-p (get-buffer (multi-libvterm-projectile-get-buffer-name)))
@@ -99,8 +97,7 @@ Will prompt you for the shell name when you type `C-u' before this command."
 
 ;;;###autoload
 (defun multi-libvterm-dedicated-open ()
-  "Open dedicated `multi-libvterm' window.
-Will prompt you for the shell name when you type `C-u' before this command."
+  "Open dedicated `multi-libvterm' window."
   (interactive)
   (if (not (multi-libvterm-dedicated-exist-p))
       (if (multi-libvterm-buffer-exist-p multi-libvterm-dedicated-buffer)
