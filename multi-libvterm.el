@@ -74,10 +74,8 @@ If this is nil, setup to environment variable of `SHELL'."
   "Create new vterm buffer.
 Will prompt you shell name when you type `C-u' before this command."
   (interactive)
-  (let (vterm-buffer)
-    (setq vterm-buffer (multi-libvterm-get-buffer))
-    (setq multi-libvterm-buffer-list (nconc multi-libvterm-buffer-list (list vterm-buffer)))
-
+  (let* ((vterm-buffer (multi-libvterm-get-buffer))
+         (multi-libvterm-buffer-list (nconc multi-libvterm-buffer-list (list vterm-buffer))))
     (set-buffer vterm-buffer)
     (multi-libvterm-internal)
     (switch-to-buffer vterm-buffer)))
@@ -92,9 +90,8 @@ Will prompt you shell name when you type `C-u' before this command."
           (if (string-equal (buffer-name (current-buffer)) (multi-libvterm-projectile-get-buffer-name))
               (delete-window (selected-window))
             (switch-to-buffer-other-window (multi-libvterm-projectile-get-buffer-name)))
-        (let (vterm-buffer)
-          (setq vterm-buffer (multi-libvterm-get-buffer 'projectile))
-          (setq multi-libvterm-buffer-list (nconc multi-libvterm-buffer-list (list vterm-buffer)))
+        (let* ((vterm-buffer (multi-libvterm-get-buffer 'projectile))
+               (multi-libvterm-buffer-list (nconc multi-libvterm-buffer-list (list vterm-buffer))))
           (set-buffer vterm-buffer)
           (multi-libvterm-internal)
           (switch-to-buffer-other-window vterm-buffer)))
