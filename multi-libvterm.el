@@ -1,4 +1,4 @@
-;;; multi-libvterm.el --- This is similar with multi-term.el but for libvterm -*- lexical-binding: t; -*-
+;;; multi-libvterm.el --- Like multi-term.el but for vterm -*- lexical-binding: t; -*-
 ;;
 ;; Authors: Minh Nguyen-Hue <minh.nh1989@gmail.com>
 ;; URL: https://github.com/suonlight/multi-libvterm
@@ -39,24 +39,24 @@
   :group 'vterm)
 
 (defcustom multi-libvterm-program nil
-  "The program of vterm.
-If this is nil, setup to environment variable of `SHELL'."
+  "The shell program run by vterm.
+If nil, this defaults to the SHELL environment variable."
   :type 'string
   :group 'multi-libvterm)
 
 (defcustom multi-libvterm-buffer-name "vterminal"
-  "The buffer name of vterm buffer."
+  "The vterm buffer name."
   :type 'string
   :group 'multi-libvterm)
 
 (defcustom multi-libvterm-dedicated-window-height 30
-  "The height of `multi-libvterm' dedicated window."
+  "The height of the `multi-libvterm' dedicated window in rows."
   :type 'integer
   :group 'multi-libvterm)
 
 ;; Contants
 (defconst multi-libvterm-dedicated-buffer-name "vterm-dedicated"
-  "The buffer name of dedicated `vterm'.")
+  "The dedicated vterm buffer name.")
 
 ;; Variables
 (defvar multi-libvterm-dedicated-window nil
@@ -72,7 +72,7 @@ If this is nil, setup to environment variable of `SHELL'."
 ;;;###autoload
 (defun multi-libvterm (&optional _buffer-name)
   "Create new vterm buffer.
-Will prompt you shell name when you type `C-u' before this command."
+Will prompt you for the shell name when you type `C-u' before this command."
   (interactive)
   (let* ((vterm-buffer (multi-libvterm-get-buffer))
          (multi-libvterm-buffer-list (nconc multi-libvterm-buffer-list (list vterm-buffer))))
@@ -83,7 +83,7 @@ Will prompt you shell name when you type `C-u' before this command."
 ;;;###autoload
 (defun multi-libvterm-projectile ()
   "Create new vterm buffer.
-Will prompt you shell name when you type `C-u' before this command."
+Will prompt you for the shell name when you type `C-u' before this command."
   (interactive)
   (if (projectile-project-p)
       (if (buffer-live-p (get-buffer (multi-libvterm-projectile-get-buffer-name)))
@@ -100,7 +100,7 @@ Will prompt you shell name when you type `C-u' before this command."
 ;;;###autoload
 (defun multi-libvterm-dedicated-open ()
   "Open dedicated `multi-libvterm' window.
-Will prompt you shell name when you type `C-u' before this command."
+Will prompt you for the shell name when you type `C-u' before this command."
   (interactive)
   (if (not (multi-libvterm-dedicated-exist-p))
       (if (multi-libvterm-buffer-exist-p multi-libvterm-dedicated-buffer)
@@ -125,7 +125,7 @@ Will prompt you shell name when you type `C-u' before this command."
         (delete-window multi-libvterm-dedicated-window)
         (if (multi-libvterm-window-exist-p current-window)
             (select-window current-window)))
-    (message "`multi-libvterm' window is not exist.")))
+    (message "`multi-libvterm' window does not exist.")))
 
 ;;;###autoload
 (defun multi-libvterm-dedicated-toggle ()
@@ -141,7 +141,7 @@ Will prompt you shell name when you type `C-u' before this command."
   (interactive)
   (if (multi-libvterm-dedicated-exist-p)
       (select-window multi-libvterm-dedicated-window)
-    (message "`multi-libvterm' window is not exist.")))
+    (message "`multi-libvterm' window does not exist.")))
 
 (defun multi-libvterm-get-buffer (&optional dedicated-window)
   "Get vterm buffer name based on DEDICATED-WINDOW.
@@ -221,9 +221,9 @@ Option OFFSET for skip OFFSET number term buffer."
   (setq multi-libvterm-dedicated-window
         (split-window
          (selected-window)
-         (- (multi-libvterm-current-window-take-height) multi-libvterm-dedicated-window-height))))
+         (- (multi-libvterm-current-window-height) multi-libvterm-dedicated-window-height))))
 
-(defun multi-libvterm-current-window-take-height (&optional window)
+(defun multi-libvterm-current-window-height (&optional window)
   "Return the height the `window' takes up.
 Not the value of `window-height', it returns usable rows available for WINDOW.
 If `window' is nil, get current window."
@@ -236,17 +236,16 @@ If `window' is nil, get current window."
   (format "*%s*" multi-libvterm-dedicated-buffer-name))
 
 (defun multi-libvterm-dedicated-exist-p ()
-  "Return `non-nil' if `multi-libvterm' dedicated window exist."
+  "Return non-nil if `multi-libvterm' dedicated window exists."
   (and (multi-libvterm-buffer-exist-p multi-libvterm-dedicated-buffer)
        (multi-libvterm-window-exist-p multi-libvterm-dedicated-window)))
 
 (defun multi-libvterm-window-exist-p (window)
-  "Return `non-nil' if WINDOW exist.
-Otherwise return nil."
+  "Return non-nil if WINDOW exist."
   (and window (window-live-p window)))
 
 (defun multi-libvterm-buffer-exist-p (buffer)
-  "Return `non-nil' if `BUFFER' exist.
+  "Return non-nil if BUFFER exist.
 Otherwise return nil."
   (and buffer (buffer-live-p buffer)))
 
