@@ -81,7 +81,7 @@ If nil, this defaults to the SHELL environment variable."
 
 ;;;###autoload
 (defun multi-vterm-projectile ()
-  "Create new vterm buffer. "
+  "Create new vterm buffer."
   (interactive)
   (if (projectile-project-p)
       (if (buffer-live-p (get-buffer (multi-vterm-projectile-get-buffer-name)))
