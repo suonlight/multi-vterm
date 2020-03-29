@@ -73,8 +73,8 @@ If nil, this defaults to the SHELL environment variable."
 (defun multi-vterm ()
   "Create new vterm buffer."
   (interactive)
-  (let* ((vterm-buffer (multi-vterm-get-buffer))
-         (multi-vterm-buffer-list (nconc multi-vterm-buffer-list (list vterm-buffer))))
+  (let* ((vterm-buffer (multi-vterm-get-buffer)))
+    (setq multi-vterm-buffer-list (nconc multi-vterm-buffer-list (list vterm-buffer)))
     (set-buffer vterm-buffer)
     (multi-vterm-internal)
     (switch-to-buffer vterm-buffer)))
