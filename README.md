@@ -5,13 +5,10 @@ This package is inspired by [multi-term.el](https://github.com/milkypostman/mult
 
 # Installation
 
-Follow [emacs-libvterm](https://github.com/akermu/emacs-libvterm) to install `emacs-libvterm`
-
-## Install by source code
+`multi-vterm` is available on MELPA, and it can be installed as normal package
 
 ```
-(use-package multi-vterm
-  :load-path "/path/to/multi-vterm")
+(use-package multi-vterm :ensure t)
 ```
 
 # Usage
@@ -26,12 +23,11 @@ Follow [emacs-libvterm](https://github.com/akermu/emacs-libvterm) to install `em
 
 # For Evil users
 
-I'm using Evil. This is my personal config to use vterm with `evil`
+I'm using Evil. This is my personal config to use `multi-vterm` with `evil`
 
 
 ```elisp
-(use-package vterm
-	:load-path "/path/to/emacs-libvterm"
+(use-package multi-vterm
 	:config
 	(add-hook 'vterm-mode-hook
 			(lambda ()
