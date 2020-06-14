@@ -106,11 +106,11 @@ If nil, this defaults to the SHELL environment variable."
         (setq multi-vterm-dedicated-buffer (multi-vterm-get-buffer 'dedicated))
         (set-buffer (multi-vterm-dedicated-get-buffer-name))
         (multi-vterm-dedicated-get-window)
-        (multi-vterm-internal))
-    (set-window-buffer multi-vterm-dedicated-window (get-buffer (multi-vterm-dedicated-get-buffer-name)))
-    (set-window-dedicated-p multi-vterm-dedicated-window t)
-    (select-window multi-vterm-dedicated-window)
-    (message "`multi-vterm' dedicated window has exist.")))
+        (multi-vterm-internal)))
+  (set-window-buffer multi-vterm-dedicated-window (get-buffer (multi-vterm-dedicated-get-buffer-name)))
+  (set-window-dedicated-p multi-vterm-dedicated-window t)
+  (select-window multi-vterm-dedicated-window)
+  (message "`multi-vterm' dedicated window has exist."))
 
 ;;;###autoload
 (defun multi-vterm-dedicated-close ()
