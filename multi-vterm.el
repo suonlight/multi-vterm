@@ -55,7 +55,7 @@ If nil, this defaults to the SHELL environment variable."
   :group 'multi-vterm)
 
 ;; Contants
-(defconst multi-vterm-dedicated-buffer-name "vterm-dedicated"
+(defconst multi-vterm-dedicated-buffer-name "dedicated"
   "The dedicated vterm buffer name.")
 
 ;; Variables
@@ -153,9 +153,9 @@ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: d
                                                     (project-root
                                                      (or (project-current) `(transient . ,default-directory))))))
             (t (progn
-                 (while (buffer-live-p (get-buffer (format "*%s<%s>*" multi-vterm-buffer-name index)))
+                 (while (buffer-live-p (get-buffer (multi-vterm-format-buffer-index index)))
                    (setq index (1+ index)))
-                 (setq vterm-name (format "*%s<%s>*" multi-vterm-buffer-name index)))))
+                 (setq vterm-name (multi-vterm-format-buffer-index index)))))
       (let ((buffer (get-buffer vterm-name)))
         (if buffer
             buffer
@@ -166,8 +166,16 @@ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: d
 
 (defun multi-vterm-project-get-buffer-name ()
   "Get project buffer name."
-  (format "*vterm - %s*"
-          (project-root (or (project-current) `(transient . ,default-directory)))))
+  (multi-vterm-format-buffer-name
+   (project-root (or (project-current) `(transient . ,default-directory)))))
+
+(defun multi-vterm-format-buffer-name (name)
+  "Format vterm buffer NAME."
+  (format "*%s - %s*" multi-vterm-buffer-name name))
+
+(defun multi-vterm-format-buffer-index (index)
+  "Format vterm buffer name with INDEX."
+  (format "*%s<%s>*" multi-vterm-buffer-name index))
 
 (defun multi-vterm-handle-close ()
   "Close current vterm buffer when `exit' from vterm buffer."
@@ -233,7 +241,7 @@ If `window' is nil, get current window."
 
 (defun multi-vterm-dedicated-get-buffer-name ()
   "Get the buffer name of `multi-vterm' dedicated window."
-  (format "*%s*" multi-vterm-dedicated-buffer-name))
+  (multi-vterm-format-buffer-name multi-vterm-dedicated-buffer-name))
 
 (defun multi-vterm-dedicated-exist-p ()
   "Return non-nil if `multi-vterm' dedicated window exists."
