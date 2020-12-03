@@ -169,6 +169,11 @@ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: d
   (multi-vterm-format-buffer-name
    (project-root (or (project-current) `(transient . ,default-directory)))))
 
+(defun multi-vterm-rename-buffer (name)
+  "Rename vterm buffer to NAME."
+  (interactive "MRename vterm buffer: ")
+  (rename-buffer (multi-vterm-format-buffer-name name)))
+
 (defun multi-vterm-format-buffer-name (name)
   "Format vterm buffer NAME."
   (format "*%s - %s*" multi-vterm-buffer-name name))
