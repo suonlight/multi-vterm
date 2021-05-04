@@ -58,6 +58,9 @@ If nil, this defaults to the SHELL environment variable."
 (defconst multi-vterm-dedicated-buffer-name "dedicated"
   "The dedicated vterm buffer name.")
 
+(defconst multi-vterm-projectile-installed-p (require 'projectile nil 'noerror)
+  "Indicate installation of projectile.")
+
 ;; Variables
 (defvar multi-vterm-dedicated-window nil
   "The dedicated `multi-vterm' window.")
@@ -83,7 +86,9 @@ If nil, this defaults to the SHELL environment variable."
 (defun multi-vterm-project ()
   "Create new vterm buffer."
   (interactive)
-  (if (project-current)
+  (if (if multi-vterm-projectile-installed-p
+          (projectile-project-p)
+        (project-current))
       (if (buffer-live-p (get-buffer (multi-vterm-project-get-buffer-name)))
           (if (string-equal (buffer-name (current-buffer)) (multi-vterm-project-get-buffer-name))
               (delete-window (selected-window))
@@ -150,8 +155,10 @@ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: d
             ((eq dedicated-window 'project) (progn
                                               (setq vterm-name (multi-vterm-project-get-buffer-name))
                                               (setq default-directory
-                                                    (project-root
-                                                     (or (project-current) `(transient . ,default-directory))))))
+                                                    (if multi-vterm-projectile-installed-p
+                                                        (projectile-project-root)
+                                                      (project-root
+                                                       (or (project-current) `(transient . ,default-directory)))))))
             (t (progn
                  (while (buffer-live-p (get-buffer (multi-vterm-format-buffer-index index)))
                    (setq index (1+ index)))
@@ -167,7 +174,9 @@ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: d
 (defun multi-vterm-project-get-buffer-name ()
   "Get project buffer name."
   (multi-vterm-format-buffer-name
-   (project-root (or (project-current) `(transient . ,default-directory)))))
+   (if multi-vterm-projectile-installed-p
+       (projectile-project-root)
+     (project-root (or (project-current) `(transient . ,default-directory))))))
 
 (defun multi-vterm-rename-buffer (name)
   "Rename vterm buffer to NAME."
