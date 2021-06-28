@@ -19,7 +19,7 @@ This package is inspired by [multi-term.el](https://github.com/milkypostman/mult
 | multi-vterm-next             | Switch to next terminal                         |
 | multi-vterm-prev             | Switch to previous terminal                     |
 | multi-vterm-dedicated-toggle | Toggle dedicated terminal                       |
-| multi-vterm-projectile       | Create/toggle terminal based on current project |
+| multi-vterm-project          | Create/toggle terminal based on current project |
 
 # For Evil users
 
