@@ -11,6 +11,22 @@ This package is inspired by [multi-term.el](https://github.com/milkypostman/mult
 (use-package multi-vterm :ensure t)
 ```
 
+# Configuration
+
+## Dedicated terminal height
+Configure the height in rows:
+```elisp
+;; dedicated terminal height of 50 rows
+(setq multi-vterm-dedicated-window-height 50)
+```
+Configure the height in percent:
+```elisp
+;; dedicated terminal height of 30%
+(setq multi-vterm-dedicated-window-height-percent 30)
+```
+If `multi-vterm-dedicated-window-height-percent` is set `multi-vterm-dedicated-window-height` is ignored.
+**Note**: The lower limit is 10% and the upper limit is 90%.
+
 # Usage
 
 | Command                         | Description                                     |
