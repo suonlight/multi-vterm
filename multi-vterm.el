@@ -25,10 +25,6 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ;; Floor, Boston, MA 02110-1301, USA.
 
-;; Features that might be required by this library:
-;;
-;;  `vterm'
-;;  `project'
 ;;; Code:
 (require 'cl-lib)
 (require 'vterm)
@@ -49,78 +45,133 @@ If nil, this defaults to the SHELL environment variable."
   :type 'string
   :group 'multi-vterm)
 
-(defcustom multi-vterm-dedicated-window-height 30
-  "The height of the `multi-vterm' dedicated window in rows."
-  :type 'integer
+(defun multi-vterm--dedicated-term-matcher (buffer _action)
+  "Match the dedicated multi-vterm buffer for `display-buffer-alist'."
+  (string-equal (multi-vterm--dedicated-get-buffer-name) buffer))
+
+(defun multi-vterm--term-matcher (buffer _action)
+  "Match a multi-vterm buffer for `display-buffer-alist'."
+  (string-prefix-p (concat "*" multi-vterm-buffer-name) buffer))
+
+(defun multi-vterm--update-display-alist (&rest _)
+  "Setter function for the display rules custom variables."
+  (customize-set-variable
+   'display-buffer-alist
+   '((multi-vterm--dedicated-term-matcher
+      (display-buffer-reuse-window display-buffer-in-side-window)
+      (dedicated . t))
+     (multi-vterm--term-matcher
+      (display-buffer-reuse-window display-buffer-pop-up-window)
+      (dedicated . t)
+      (inhibit-same-window . t)
+      (mode . vterm)))))
+
+(defcustom multi-vterm-dedicated-window-dimensions
+  '(:target-width 70
+    :target-height 30
+    :min-width 50
+    :min-height 10)
+  "The size hints of the dedicated window"
+  :type '(plist :value-type integer)
+  :options '(:target-width :target-height :min-width :min-height)
+  :set (lambda (_name new-value)
+         (customize-set-variable
+          'display-buffer-alist
+          `((multi-vterm--dedicated-term-matcher
+             (display-buffer-in-side-window)
+             (dedicated . t)
+             (window-min-height . ,(plist-get new-value :min-height))
+             (window-height . ,(plist-get new-value :target-height))
+             (window-min-width . ,(plist-get new-value :min-width))
+             (window-width . ,(plist-get new-value :target-width))))))
   :group 'multi-vterm)
 
-;; Contants
-(defconst multi-vterm-dedicated-buffer-name "dedicated"
-  "The dedicated vterm buffer name.")
+(defcustom multi-vterm-dedicated-window-side
+  'bottom
+  "The side of the dedicated window"
+  :type '(choice (const :tag "Bottom" bottom)
+                 (const :tag "Top" top)
+                 (const :tag "Left" left)
+                 (const :tag "Right" right))
+  :set (lambda (_name new-value)
+         (customize-set-variable
+          'display-buffer-alist
+          `((multi-vterm--dedicated-term-matcher
+             (display-buffer-in-side-window)
+             (dedicated . t)
+             (side . ,new-value )))))
+  :group 'multi-vterm)
 
-;; Variables
-(defvar multi-vterm-dedicated-window nil
-  "The dedicated `multi-vterm' window.")
+(defcustom multi-vterm-window-dimensions
+  '(:target-width 70
+    :target-height 30
+    :min-width 50
+    :min-height 10)
+  "The size hints of the vterm windows"
+  :type '(plist :value-type integer)
+  :options '(:target-width :target-height :min-width :min-height)
+  :set (lambda (_name new-value)
+         (customize-set-variable
+          'display-buffer-alist
+          `((multi-vterm--term-matcher
+             (display-buffer-reuse-window display-buffer-pop-up-window)
+             (dedicated . t)
+             (inhibit-same-window . t)
+             (mode . vterm)
+             (window-min-height . ,(plist-get new-value :min-height))
+             (window-height . ,(plist-get new-value :target-height))
+             (window-min-width . ,(plist-get new-value :min-width))
+             (window-width . ,(plist-get new-value :target-width))))))
+  :group 'multi-vterm)
 
-(defvar multi-vterm-dedicated-buffer nil
-  "The dedicated `multi-vterm' buffer.")
+(defcustom multi-vterm-dedicated-buffer-name "dedicated"
+  "The dedicated vterm buffer name."
+  :type 'string)
 
+;;;; Variables
 (defvar multi-vterm-buffer-list nil
   "The list of non-dedicated terminal buffers managed by `multi-vterm'.")
 
-;; Interactive Functions
+;;;; Interactive Functions
 ;;;###autoload
 (defun multi-vterm ()
   "Create new vterm buffer."
   (interactive)
-  (let* ((vterm-buffer (multi-vterm-get-buffer)))
+  (let* ((vterm-buffer (multi-vterm-get-buffer-create)))
     (setq multi-vterm-buffer-list (nconc multi-vterm-buffer-list (list vterm-buffer)))
-    (set-buffer vterm-buffer)
-    (multi-vterm-internal)
-    (switch-to-buffer vterm-buffer)))
+    (pop-to-buffer vterm-buffer)))
 
 ;;;###autoload
 (defun multi-vterm-project ()
-  "Create new vterm buffer."
+  "Create new project vterm buffer."
   (interactive)
+  ;; TODO: simplify this function to make it a toggle as well
   (if (multi-vterm-project-root)
       (if (buffer-live-p (get-buffer (multi-vterm-project-get-buffer-name)))
           (if (string-equal (buffer-name (current-buffer)) (multi-vterm-project-get-buffer-name))
               (delete-window (selected-window))
-            (switch-to-buffer-other-window (multi-vterm-project-get-buffer-name)))
-        (let* ((vterm-buffer (multi-vterm-get-buffer 'project))
+            (pop-to-buffer (multi-vterm-project-get-buffer-name)))
+        (let* ((vterm-buffer (multi-vterm-get-buffer-create 'project))
                (multi-vterm-buffer-list (nconc multi-vterm-buffer-list (list vterm-buffer))))
-          (set-buffer vterm-buffer)
-          (multi-vterm-internal)
-          (switch-to-buffer-other-window vterm-buffer)))
-    (message "This file is not in a project")))
+          (pop-to-buffer vterm-buffer)))
+    (user-error "This file is not in a project")))
 
 ;;;###autoload
 (defun multi-vterm-dedicated-open ()
   "Open dedicated `multi-vterm' window."
   (interactive)
-  (if (not (multi-vterm-dedicated-exist-p))
-      (if (multi-vterm-buffer-exist-p multi-vterm-dedicated-buffer)
-          (unless (multi-vterm-window-exist-p multi-vterm-dedicated-window)
-            (multi-vterm-dedicated-get-window))
-        (setq multi-vterm-dedicated-buffer (multi-vterm-get-buffer 'dedicated))
-        (set-buffer (multi-vterm-dedicated-get-buffer-name))
-        (multi-vterm-dedicated-get-window)
-        (multi-vterm-internal)))
-  (set-window-buffer multi-vterm-dedicated-window (get-buffer (multi-vterm-dedicated-get-buffer-name)))
-  (set-window-dedicated-p multi-vterm-dedicated-window t)
-  (select-window multi-vterm-dedicated-window)
-  (message "`multi-vterm' dedicated window has exist."))
+  (pop-to-buffer (multi-vterm-get-buffer-create 'dedicated))
+  (message "`multi-vterm' dedicated window exists."))
 
 ;;;###autoload
 (defun multi-vterm-dedicated-close ()
   "Close dedicated `multi-vterm' window."
   (interactive)
-  (if (multi-vterm-dedicated-exist-p)
+  (if (multi-vterm--dedicated-exist-p)
       (let ((current-window (selected-window)))
         (multi-vterm-dedicated-select)
-        (delete-window multi-vterm-dedicated-window)
-        (if (multi-vterm-window-exist-p current-window)
+        (delete-window (multi-vterm--dedicated-get-buffer-window))
+        (if (multi-vterm--window-exist-p current-window)
             (select-window current-window)))
     (message "`multi-vterm' window does not exist.")))
 
@@ -128,7 +179,7 @@ If nil, this defaults to the SHELL environment variable."
 (defun multi-vterm-dedicated-toggle ()
   "Toggle dedicated `multi-vterm' window."
   (interactive)
-  (if (multi-vterm-dedicated-exist-p)
+  (if (multi-vterm--dedicated-exist-p)
       (multi-vterm-dedicated-close)
     (multi-vterm-dedicated-open)))
 
@@ -136,17 +187,17 @@ If nil, this defaults to the SHELL environment variable."
 (defun multi-vterm-dedicated-select ()
   "Select the `multi-vterm' dedicated window."
   (interactive)
-  (if (multi-vterm-dedicated-exist-p)
-      (select-window multi-vterm-dedicated-window)
+  (if (multi-vterm--dedicated-exist-p)
+      (select-window (multi-vterm--dedicated-get-buffer-window))
     (message "`multi-vterm' window does not exist.")))
 
-(defun multi-vterm-get-buffer (&optional dedicated-window)
-  "Get vterm buffer name based on DEDICATED-WINDOW.
+(defun multi-vterm-get-buffer-create (&optional dedicated-window)
+  "Get vterm buffer based on DEDICATED-WINDOW, creating it if necessary.
 Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: dedicated, project, default."
   (with-temp-buffer
     (let ((index 1)
           vterm-name)
-      (cond ((eq dedicated-window 'dedicated) (setq vterm-name (multi-vterm-dedicated-get-buffer-name)))
+      (cond ((eq dedicated-window 'dedicated) (setq vterm-name (multi-vterm--dedicated-get-buffer-name)))
             ((eq dedicated-window 'project) (progn
                                               (setq vterm-name (multi-vterm-project-get-buffer-name))
                                               (setq default-directory (multi-vterm-project-root))))
@@ -160,13 +211,14 @@ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: d
           (let ((buffer (generate-new-buffer vterm-name)))
             (set-buffer buffer)
             (vterm-mode)
+            (multi-vterm--internal buffer)
             buffer))))))
 
 (defun multi-vterm-project-root ()
   "Get `default-directory' for project using projectile or project.el."
-  (unless (boundp 'multi-vterm-projectile-installed-p)
-    (setq multi-vterm-projectile-installed-p (require 'projectile nil t)))
-  (if multi-vterm-projectile-installed-p
+  (unless (boundp 'multi-vterm--projectile-installed-p)
+    (setq multi-vterm--projectile-installed-p (require 'projectile nil t)))
+  (if multi-vterm--projectile-installed-p
       (projectile-project-root)
     (project-root
      (or (project-current) `(transient . ,default-directory)))))
@@ -178,11 +230,15 @@ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: d
 (defun multi-vterm-rename-buffer (name)
   "Rename vterm buffer to NAME."
   (interactive "MRename vterm buffer: ")
-  (rename-buffer (multi-vterm-format-buffer-name name)))
+  (if (string-equal (buffer-name) (multi-vterm--dedicated-get-buffer-name))
+      (user-error "Cannot rename the dedicated terminal buffer!")
+    (rename-buffer (multi-vterm-format-buffer-name name))))
 
-(defun multi-vterm-format-buffer-name (name)
+(defun multi-vterm-format-buffer-name (name &optional tag)
   "Format vterm buffer NAME."
-  (format "*%s - %s*" multi-vterm-buffer-name name))
+  (cond
+   ((eq tag 'dedicated) (format "*%s*" multi-vterm-dedicated-buffer-name))
+   (t (format "*%s - %s*" multi-vterm-buffer-name name))))
 
 (defun multi-vterm-format-buffer-index (index)
   "Format vterm buffer name with INDEX."
@@ -200,29 +256,30 @@ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: d
   "Go to the next term buffer.
 If OFFSET is `non-nil', will goto next term buffer with OFFSET."
   (interactive "P")
-  (multi-vterm-switch 'NEXT (or offset 1)))
+  (multi-vterm--switch 'NEXT (or offset 1)))
 
 (defun multi-vterm-prev (&optional offset)
   "Go to the previous term buffer.
 If OFFSET is `non-nil', will goto next term buffer with OFFSET."
   (interactive "P")
-  (multi-vterm-switch 'PREVIOUS (or offset 1)))
+  (multi-vterm--switch 'PREVIOUS (or offset 1)))
 
-(defun multi-vterm-switch (direction offset)
+(defun multi-vterm--switch (direction offset)
   "Internal `multi-vterm' buffers switch function.
 If DIRECTION is `NEXT', switch to the next term.
 If DIRECTION `PREVIOUS', switch to the previous term.
 Option OFFSET for skip OFFSET number term buffer."
-  (unless (multi-vterm-switch-internal direction offset)
+  (unless (multi-vterm--switch-internal direction offset)
     (multi-vterm)))
 
-;; Utility Functions
-(defun multi-vterm-internal ()
+;;;; Utility Functions
+(defun multi-vterm--internal (buffer)
   "Internal handle for `multi-vterm' buffer."
-  (multi-vterm-handle-close)
-  (add-hook 'kill-buffer-hook #'multi-vterm-kill-buffer-hook))
+  (with-current-buffer buffer
+    (multi-vterm-handle-close)
+    (add-hook 'kill-buffer-hook #'multi-vterm--kill-buffer-hook)))
 
-(defun multi-vterm-kill-buffer-hook ()
+(defun multi-vterm--kill-buffer-hook ()
   "Function that hook `kill-buffer-hook'."
   (when (eq major-mode 'vterm-mode)
     (let ((killed-buffer (current-buffer)))
@@ -235,40 +292,34 @@ Option OFFSET for skip OFFSET number term buffer."
       (getenv "SHELL")
       shell-file-name))
 
-(defun multi-vterm-dedicated-get-window ()
-  "Get `multi-vterm' dedicated window."
-  (setq multi-vterm-dedicated-window
-        (split-window
-         (selected-window)
-         (- (multi-vterm-current-window-height) multi-vterm-dedicated-window-height))))
-
-(defun multi-vterm-current-window-height (&optional window)
-  "Return the height the `window' takes up.
-Not the value of `window-height', it returns usable rows available for WINDOW.
-If `window' is nil, get current window."
-  (let ((edges (window-edges window)))
-    (- (nth 3 edges) (nth 1 edges))))
-
-
-(defun multi-vterm-dedicated-get-buffer-name ()
+(defun multi-vterm--dedicated-get-buffer-name ()
   "Get the buffer name of `multi-vterm' dedicated window."
-  (multi-vterm-format-buffer-name multi-vterm-dedicated-buffer-name))
+  (multi-vterm-format-buffer-name nil 'dedicated))
 
-(defun multi-vterm-dedicated-exist-p ()
+(defun multi-vterm--dedicated-get-buffer ()
+  "Get the buffer of `multi-vterm' dedicated window, or nil if it does not exist."
+  (get-buffer (multi-vterm--dedicated-get-buffer-name)))
+
+(defun multi-vterm--dedicated-get-buffer-window ()
+  "Get the `multi-vterm' dedicated window, or nil if it does not exist."
+  (get-buffer-window (multi-vterm--dedicated-get-buffer)))
+
+(defun multi-vterm--dedicated-exist-p ()
   "Return non-nil if `multi-vterm' dedicated window exists."
-  (and (multi-vterm-buffer-exist-p multi-vterm-dedicated-buffer)
-       (multi-vterm-window-exist-p multi-vterm-dedicated-window)))
+  (let ((dedicated-buffer (multi-vterm--dedicated-get-buffer)))
+    (and (multi-vterm--buffer-exist-p dedicated-buffer)
+         (multi-vterm--window-exist-p (get-buffer-window dedicated-buffer)))))
 
-(defun multi-vterm-window-exist-p (window)
+(defun multi-vterm--window-exist-p (window)
   "Return non-nil if WINDOW exist."
   (and window (window-live-p window)))
 
-(defun multi-vterm-buffer-exist-p (buffer)
+(defun multi-vterm--buffer-exist-p (buffer)
   "Return non-nil if BUFFER exist.
 Otherwise return nil."
   (and buffer (buffer-live-p buffer)))
 
-(defun multi-vterm-switch-internal (direction offset)
+(defun multi-vterm--switch-internal (direction offset)
   "Internal `multi-vterm' buffers switch function.
 If DIRECTION is `NEXT', switch to the next term.
 If DIRECTION `PREVIOUS', switch to the previous term.
@@ -280,8 +331,9 @@ Option OFFSET for skip OFFSET number term buffer."
           (let ((target-index (if (eq direction 'NEXT)
                                   (mod (+ my-index offset) buffer-list-len)
                                 (mod (- my-index offset) buffer-list-len))))
-            (switch-to-buffer (nth target-index multi-vterm-buffer-list)))
-        (switch-to-buffer (car multi-vterm-buffer-list))))))
+            (pop-to-buffer (nth target-index multi-vterm-buffer-list)))
+        (pop-to-buffer (car multi-vterm-buffer-list))))))
+
 
 (provide 'multi-vterm)
 ;;; multi-vterm.el ends here
