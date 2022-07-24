@@ -73,8 +73,7 @@ If nil, this defaults to the SHELL environment variable."
              (window-width . ,(plist-get new-value :target-width))))))
   :group 'multi-vterm)
 
-(defcustom multi-vterm-dedicated-window-side
-  'bottom
+(defcustom multi-vterm-dedicated-window-side 'bottom
   "The side of the dedicated window"
   :type '(choice (const :tag "Bottom" bottom)
                  (const :tag "Top" top)
@@ -86,7 +85,7 @@ If nil, this defaults to the SHELL environment variable."
           `((multi-vterm--dedicated-term-matcher
              (display-buffer-in-side-window)
              (dedicated . t)
-             (side . ,new-value )))))
+             (side . ,new-value)))))
   :group 'multi-vterm)
 
 (defcustom multi-vterm-window-dimensions
