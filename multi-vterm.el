@@ -53,19 +53,6 @@ If nil, this defaults to the SHELL environment variable."
   "Match a multi-vterm buffer for `display-buffer-alist'."
   (string-prefix-p (concat "*" multi-vterm-buffer-name) buffer))
 
-(defun multi-vterm--update-display-alist (&rest _)
-  "Setter function for the display rules custom variables."
-  (customize-set-variable
-   'display-buffer-alist
-   '((multi-vterm--dedicated-term-matcher
-      (display-buffer-reuse-window display-buffer-in-side-window)
-      (dedicated . t))
-     (multi-vterm--term-matcher
-      (display-buffer-reuse-window display-buffer-pop-up-window)
-      (dedicated . t)
-      (inhibit-same-window . t)
-      (mode . vterm)))))
-
 (defcustom multi-vterm-dedicated-window-dimensions
   '(:target-width 70
     :target-height 30
