@@ -145,15 +145,18 @@ If nil, this defaults to the SHELL environment variable."
 (defun multi-vterm-project ()
   "Create new project vterm buffer."
   (interactive)
-  ;; TODO: simplify this function to make it a toggle as well
-  (if (multi-vterm-project-root)
+  (if-let ((project-name (multi-vterm-project-root)))
       (if (buffer-live-p (get-buffer (multi-vterm-project-get-buffer-name)))
           (if (string-equal (buffer-name (current-buffer)) (multi-vterm-project-get-buffer-name))
-              (delete-window (selected-window))
-            (pop-to-buffer (multi-vterm-project-get-buffer-name)))
+              (progn
+                (delete-window (selected-window))
+                (message "Deleted terminal window for %s" project-name))
+            (pop-to-buffer (multi-vterm-project-get-buffer-name))
+            (message "Switched terminal window for %s" project-name))
         (let* ((vterm-buffer (multi-vterm-get-buffer-create 'project))
                (multi-vterm-buffer-list (nconc multi-vterm-buffer-list (list vterm-buffer))))
-          (pop-to-buffer vterm-buffer)))
+          (pop-to-buffer vterm-buffer)
+          (message "Added terminal window for %s" project-name)))
     (user-error "This file is not in a project")))
 
 ;;;###autoload
@@ -331,8 +334,12 @@ Option OFFSET for skip OFFSET number term buffer."
           (let ((target-index (if (eq direction 'NEXT)
                                   (mod (+ my-index offset) buffer-list-len)
                                 (mod (- my-index offset) buffer-list-len))))
-            (pop-to-buffer (nth target-index multi-vterm-buffer-list)))
-        (pop-to-buffer (car multi-vterm-buffer-list))))))
+            (pop-to-buffer (nth target-index multi-vterm-buffer-list))
+            (message "Terminal %s / %s" (1+ target-index) buffer-list-len)
+            t)
+        (pop-to-buffer (car multi-vterm-buffer-list))
+        (message "Terminal 1 / %s" buffer-list-len)
+        t))))
 
 
 (provide 'multi-vterm)
