@@ -101,9 +101,8 @@ If nil, this defaults to the SHELL environment variable."
          (customize-set-variable
           'display-buffer-alist
           `((multi-vterm--term-matcher
-             (display-buffer-reuse-window display-buffer-pop-up-window)
+             (display-buffer-reuse-window display-buffer-pop-up-window display-buffer-use-some-window display-buffer-use-some-frame display-buffer-pop-up-frame)
              (dedicated . t)
-             (inhibit-same-window . t)
              (mode . vterm)
              (window-min-height . ,(plist-get new-value :min-height))
              (window-height . ,(plist-get new-value :target-height))
