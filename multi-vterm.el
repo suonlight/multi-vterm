@@ -54,9 +54,17 @@ If nil, this defaults to the SHELL environment variable."
   :type 'integer
   :group 'multi-vterm)
 
+(defcustom multi-vterm-dedicated-window-height-percent nil
+  "The height of the `multi-vterm' dedicated window in percent of rows."
+  :type 'integer
+  :group 'multi-vterm)
+
 ;; Contants
 (defconst multi-vterm-dedicated-buffer-name "dedicated"
   "The dedicated vterm buffer name.")
+
+(defconst multi-vterm-dedicated-window-height-percent-limits '(10 90)
+  "The dedicated vterm buffer height boundaries in percent")
 
 ;; Variables
 (defvar multi-vterm-dedicated-window nil
@@ -238,9 +246,9 @@ Option OFFSET for skip OFFSET number term buffer."
 (defun multi-vterm-dedicated-get-window ()
   "Get `multi-vterm' dedicated window."
   (setq multi-vterm-dedicated-window
-        (split-window
-         (selected-window)
-         (- (multi-vterm-current-window-height) multi-vterm-dedicated-window-height))))
+	(split-window
+	 (selected-window)
+	 (- (multi-vterm-current-window-height) (multi-vterm-dedicated-calc-window-height)))))
 
 (defun multi-vterm-current-window-height (&optional window)
   "Return the height the `window' takes up.
@@ -249,6 +257,17 @@ If `window' is nil, get current window."
   (let ((edges (window-edges window)))
     (- (nth 3 edges) (nth 1 edges))))
 
+(defun multi-vterm-dedicated-calc-window-height ()
+  "Return the height the dedicated `multi-vterm' window should have"
+  (if multi-vterm-dedicated-window-height-percent
+      (let* ((percent (min multi-vterm-dedicated-window-height-percent
+			      (nth 1 multi-vterm-dedicated-window-height-percent-limits)))
+	     (percent (max percent
+			      (nth 0 multi-vterm-dedicated-window-height-percent-limits))))
+	(ceiling (* (float (multi-vterm-current-window-height))
+		    (/ (float percent)
+		       100))))
+	multi-vterm-dedicated-window-height))
 
 (defun multi-vterm-dedicated-get-buffer-name ()
   "Get the buffer name of `multi-vterm' dedicated window."
