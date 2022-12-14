@@ -47,11 +47,11 @@ If nil, this defaults to the SHELL environment variable."
 
 (defun multi-vterm--dedicated-term-matcher (buffer _action)
   "Match the dedicated multi-vterm buffer for `display-buffer-alist'."
-  (string-equal (multi-vterm--dedicated-get-buffer-name) buffer))
+  (string-equal (multi-vterm--dedicated-get-buffer-name) (buffer-name buffer)))
 
 (defun multi-vterm--term-matcher (buffer _action)
   "Match a multi-vterm buffer for `display-buffer-alist'."
-  (string-prefix-p (concat "*" multi-vterm-buffer-name) buffer))
+  (string-prefix-p (concat "*" multi-vterm-buffer-name) (buffer-name buffer)))
 
 (defcustom multi-vterm-dedicated-window-dimensions
   '(:target-width 70
