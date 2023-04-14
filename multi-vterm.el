@@ -78,10 +78,10 @@ If nil, this defaults to the SHELL environment variable."
 
 ;; Interactive Functions
 ;;;###autoload
-(defun multi-vterm ()
+(defun multi-vterm (&optional vterm-name)
   "Create new vterm buffer."
   (interactive)
-  (let* ((vterm-buffer (multi-vterm-get-buffer)))
+  (let* ((vterm-buffer (multi-vterm-get-buffer vterm-name)))
     (setq multi-vterm-buffer-list (nconc multi-vterm-buffer-list (list vterm-buffer)))
     (set-buffer vterm-buffer)
     (multi-vterm-internal)
@@ -158,6 +158,7 @@ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: d
             ((eq dedicated-window 'project) (progn
                                               (setq vterm-name (multi-vterm-project-get-buffer-name))
                                               (setq default-directory (multi-vterm-project-root))))
+            ((stringp dedicated-window) (setq vterm-name dedicated-window))
             (t (progn
                  (while (buffer-live-p (get-buffer (multi-vterm-format-buffer-index index)))
                    (setq index (1+ index)))
