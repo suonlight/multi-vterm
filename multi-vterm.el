@@ -36,7 +36,7 @@
 
 (defcustom multi-vterm-program nil
   "The shell program run by vterm.
-If nil, this defaults to the SHELL environment variable."
+ If nil, this defaults to the SHELL environment variable."
   :type 'string
   :group 'multi-vterm)
 
@@ -47,11 +47,11 @@ If nil, this defaults to the SHELL environment variable."
 
 (defun multi-vterm--dedicated-term-matcher (buffer _action)
   "Match the dedicated multi-vterm buffer for `display-buffer-alist'."
-  (string-equal (multi-vterm--dedicated-get-buffer-name) (buffer-name buffer)))
+  (string-equal (multi-vterm--dedicated-get-buffer-name) (if (bufferp buffer) (buffer-name buffer) buffer)))
 
 (defun multi-vterm--term-matcher (buffer _action)
   "Match a multi-vterm buffer for `display-buffer-alist'."
-  (string-prefix-p (concat "*" multi-vterm-buffer-name) (buffer-name buffer)))
+  (string-prefix-p (concat "*" multi-vterm-buffer-name) (if (bufferp buffer) (buffer-name buffer) buffer)))
 
 (defcustom multi-vterm-dedicated-window-dimensions
   '(:target-width 70
@@ -181,7 +181,7 @@ If nil, this defaults to the SHELL environment variable."
 
 (defun multi-vterm-get-buffer-create (&optional dedicated-window)
   "Get vterm buffer based on DEDICATED-WINDOW, creating it if necessary.
-Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: dedicated, project, default."
+ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: dedicated, project, default."
   (with-temp-buffer
     (let ((index 1)
           vterm-name)
@@ -242,21 +242,21 @@ Optional argument DEDICATED-WINDOW: There are three types of DEDICATED-WINDOW: d
 
 (defun multi-vterm-next (&optional offset)
   "Go to the next term buffer.
-If OFFSET is `non-nil', will goto next term buffer with OFFSET."
+ If OFFSET is `non-nil', will goto next term buffer with OFFSET."
   (interactive "P")
   (multi-vterm--switch 'NEXT (or offset 1)))
 
 (defun multi-vterm-prev (&optional offset)
   "Go to the previous term buffer.
-If OFFSET is `non-nil', will goto next term buffer with OFFSET."
+ If OFFSET is `non-nil', will goto next term buffer with OFFSET."
   (interactive "P")
   (multi-vterm--switch 'PREVIOUS (or offset 1)))
 
 (defun multi-vterm--switch (direction offset)
   "Internal `multi-vterm' buffers switch function.
-If DIRECTION is `NEXT', switch to the next term.
-If DIRECTION `PREVIOUS', switch to the previous term.
-Option OFFSET for skip OFFSET number term buffer."
+ If DIRECTION is `NEXT', switch to the next term.
+ If DIRECTION `PREVIOUS', switch to the previous term.
+ Option OFFSET for skip OFFSET number term buffer."
   (unless (multi-vterm--switch-internal direction offset)
     (multi-vterm)))
 
@@ -304,14 +304,14 @@ Option OFFSET for skip OFFSET number term buffer."
 
 (defun multi-vterm--buffer-exist-p (buffer)
   "Return non-nil if BUFFER exist.
-Otherwise return nil."
+ Otherwise return nil."
   (and buffer (buffer-live-p buffer)))
 
 (defun multi-vterm--switch-internal (direction offset)
   "Internal `multi-vterm' buffers switch function.
-If DIRECTION is `NEXT', switch to the next term.
-If DIRECTION `PREVIOUS', switch to the previous term.
-Option OFFSET for skip OFFSET number term buffer."
+ If DIRECTION is `NEXT', switch to the next term.
+ If DIRECTION `PREVIOUS', switch to the previous term.
+ Option OFFSET for skip OFFSET number term buffer."
   (when multi-vterm-buffer-list
     (let ((buffer-list-len (length multi-vterm-buffer-list))
           (my-index (cl-position (current-buffer) multi-vterm-buffer-list)))
